@@ -1,3 +1,5 @@
+import abc
+
 # Função que exibe o menu principal do sistema
 def menu():
     tam = len('Sistema Bancário - MENU') + 4  # Define o tamanho da linha de separação
@@ -36,27 +38,43 @@ class Cliente(PessoaFisica):
     def adicionar_conta(self, conta):
         self.contas.append(conta)
 
-    # Representação textual do cliente (comentada)
-    # def __repr__(self):
-    #     return f'{self.nome} (nome), {self.data_nascimento} (data de nascimento), {self.endereco} (endereço)'
-
-
 # Classe Conta representando uma conta bancária simples
 class Conta:
+    contador_contas = 0
+
     def __init__(self, agencia, saldo=0.0):
         self._saldo = saldo
         self.agencia = agencia
 
+    @staticmethod
+    def criar_conta(usuario_escolhido):
+
+        if usuario_escolhido not in dict_clientes:
+            print('Usuário Inexistente')
+
+        conta = Conta('0001')  # Cria uma nova conta com agência padrão
+
+        dict_clientes[usuario_escolhido].adicionar_conta(conta)
+
+        Conta.contador_contas += 1
+
     def __repr__(self):
         return f'Agencia -> {self.agencia} / Saldo -> R${self._saldo:.2f}'
-
+    
+    def saque(self, valor):
+        self.contador_saques = 5
+        if self.contador_saques > 0 and valor <= 500 and valor <= self._saldo and valor > 0:
+            self._saldo = self._saldo - valor
+            self.contador_saques -= 1
+            return self._saldo, self.contador_saques
+        
+    def deposito(self, valor):
+        if valor > 0:
+            self._saldo = self._saldo + valor
+            return self._saldo
 
 # Dicionário que armazena os clientes usando o CPF como chave
 dict_clientes = dict()
-
-# Lista geral de contas (não utilizada neste trecho do código)
-list_contas = list()
-
 
 # Loop principal do programa
 while True:
@@ -69,10 +87,35 @@ while True:
         continue
 
     elif operacao == '1':
-        pass  # Operação de saque ainda não implementada
+        print('Saque!')
+        print('Insira qual usuário deseja acessar!')
+        for chave in dict_clientes:
+            print(f'{dict_clientes[chave].nome}: {chave}')
+        usuario_escolhido = str(input('Indique o CPF: '))
+        if len(dict_clientes[chave].contas) > 1:
+            print('Indique qual conta deseja depositar!')
+            for c in range(0, len(dict_clientes[usuario_escolhido].contas)):
+                print(f'[{c}] - {dict_clientes[usuario_escolhido].contas[c]}')
+            conta_escolhida = int(input())
+        valor_saque = float(input('Insira o valor de saque: '))
+        saldo = Conta.saque(dict_clientes[usuario_escolhido].contas[conta_escolhida], valor_saque)
+        print(f'Saldo atual = R${saldo[0]:.2f}')
+        print(f'Quantidade de saques restantes = {saldo[1]}')
 
     elif operacao == '2':
-        pass  # Operação de depósito ainda não implementada
+        print('Depósito!')
+        print('Insira qual usuário deseja acessar!')
+        for chave in dict_clientes:
+            print(f'{dict_clientes[chave].nome}: {chave}')
+        usuario_escolhido = str(input('Indique o CPF: '))
+        if len(dict_clientes[chave].contas) > 1:
+            print('Indique qual conta deseja depositar!')
+            for c in range(0, len(dict_clientes[usuario_escolhido].contas)):
+                print(f'[{c}] - {dict_clientes[usuario_escolhido].contas[c]}')
+            conta_escolhida = int(input())
+        valor_deposito = float(input('Insira o valor de depósito: '))
+        saldo = Conta.deposito(dict_clientes[usuario_escolhido].contas[conta_escolhida], valor_deposito)
+        print(f'Saldo -> R${saldo:.2f}')
 
     elif operacao == '3':
         pass  # Visualização de extrato ainda não implementada
@@ -85,7 +128,7 @@ while True:
         data_nascimento = str(input('Data Insira a sua data de nascimento: '))
         endereco = str(input('Insira o seu endereço: '))
         usuario = Cliente(cpf, nome, data_nascimento, endereco)
-        dict_clientes[cpf] = usuario  # Armazena o cliente no dicionário
+        dict_clientes[cpf] = usuario
 
     elif operacao == '5':
         # Criação de nova conta para um usuário existente
@@ -95,22 +138,11 @@ while True:
         for chave in dict_clientes:
             print(f'{dict_clientes[chave].nome}: {chave}')  # Exibe os usuários existentes
 
-        usuario_escolhido = str(input('Indique o CPF: '))
-
-        if usuario_escolhido not in dict_clientes:
-            print('Usuário Inexistente')
-
-        conta = Conta('0001')  # Cria uma nova conta com agência padrão
-
-        dict_clientes[usuario_escolhido].adicionar_conta(conta)
+        Conta.criar_conta(str(input('Indique o CPF: ')))
 
     elif operacao == '8':
         break  # Encerra o programa
 
-
-# Exibe todos os clientes e suas informações
-# for chave in dict_clientes:
-#     print(f'{chave}: {dict_clientes[chave].nome} / {dict_clientes[chave].data_nascimento} / {dict_clientes[chave].endereco}')
-
 for chave in dict_clientes:
     print(f'{chave}: {dict_clientes[chave].nome} / {dict_clientes[chave]}')
+    print(f'O usuário {dict_clientes[chave].nome}, possui {len(dict_clientes[chave].contas)} contas')
