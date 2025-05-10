@@ -1,4 +1,6 @@
 import abc
+from time import sleep
+from datetime import datetime
 
 # Função que exibe o menu principal do sistema
 def menu():
@@ -38,9 +40,11 @@ class Cliente(PessoaFisica):
     def adicionar_conta(self, conta):
         self.contas.append(conta)
 
+
 # Classe Conta representando uma conta bancária simples
 class Conta:
-    contador_contas = 0
+    contador_contas = 0  # Contador total de contas criadas
+    dict_extrato = dict()  # Dicionário para armazenar extratos por CPF
 
     def __init__(self, agencia, saldo=0.0):
         self._saldo = saldo
@@ -48,38 +52,52 @@ class Conta:
 
     @staticmethod
     def criar_conta(usuario_escolhido):
-
         if usuario_escolhido not in dict_clientes:
             print('Usuário Inexistente')
 
         conta = Conta('0001')  # Cria uma nova conta com agência padrão
-
         dict_clientes[usuario_escolhido].adicionar_conta(conta)
-
         Conta.contador_contas += 1
 
     def __repr__(self):
         return f'Agencia -> {self.agencia} / Saldo -> R${self._saldo:.2f}'
-    
-    def saque(self, valor):
-        self.contador_saques = 5
+
+    def saque(self, valor, usuario_escolhido):
+        self.contador_saques = 5  # NOVO: contador de saques diário/resetável
         if self.contador_saques > 0 and valor <= 500 and valor <= self._saldo and valor > 0:
-            self._saldo = self._saldo - valor
+            self._saldo -= valor
             self.contador_saques -= 1
+            if usuario_escolhido not in Conta.dict_extrato:
+                Conta.dict_extrato[usuario_escolhido] = []
+            # NOVO: registro do saque no extrato com data/hora
+            Conta.dict_extrato[usuario_escolhido].append(
+                f'Saque -> R${valor:.2f} [{datetime.now().strftime("%d/%m/%Y %H:%M:%S")}]'
+            )
             return self._saldo, self.contador_saques
-        
-    def deposito(self, valor):
+
+    def deposito(self, valor, usuario_escolhido):
         if valor > 0:
-            self._saldo = self._saldo + valor
+            self._saldo += valor
+            if usuario_escolhido not in Conta.dict_extrato:
+                Conta.dict_extrato[usuario_escolhido] = []
+            # NOVO: registro do depósito no extrato com data/hora
+            Conta.dict_extrato[usuario_escolhido].append(
+                f'Depósito -> R${valor:.2f} [{datetime.now().strftime("%d/%m/%Y %H:%M:%S")}]'
+            )
             return self._saldo
+
+    @staticmethod
+    def extrato(cpf):
+        for item in Conta.dict_extrato[cpf]:
+            print(item)
+
 
 # Dicionário que armazena os clientes usando o CPF como chave
 dict_clientes = dict()
 
 # Loop principal do programa
 while True:
-    menu()  # Exibe o menu
-
+    menu()
     operacao = str(input('Indique a operação desejada: '))
 
     if operacao not in '123458':
@@ -93,12 +111,12 @@ while True:
             print(f'{dict_clientes[chave].nome}: {chave}')
         usuario_escolhido = str(input('Indique o CPF: '))
         if len(dict_clientes[chave].contas) > 1:
-            print('Indique qual conta deseja depositar!')
-            for c in range(0, len(dict_clientes[usuario_escolhido].contas)):
+            print('Indique qual conta deseja sacar!')
+            for c in range(len(dict_clientes[usuario_escolhido].contas)):
                 print(f'[{c}] - {dict_clientes[usuario_escolhido].contas[c]}')
             conta_escolhida = int(input())
         valor_saque = float(input('Insira o valor de saque: '))
-        saldo = Conta.saque(dict_clientes[usuario_escolhido].contas[conta_escolhida], valor_saque)
+        saldo = Conta.saque(dict_clientes[usuario_escolhido].contas[conta_escolhida], valor_saque, usuario_escolhido)
         print(f'Saldo atual = R${saldo[0]:.2f}')
         print(f'Quantidade de saques restantes = {saldo[1]}')
 
@@ -110,39 +128,46 @@ while True:
         usuario_escolhido = str(input('Indique o CPF: '))
         if len(dict_clientes[chave].contas) > 1:
             print('Indique qual conta deseja depositar!')
-            for c in range(0, len(dict_clientes[usuario_escolhido].contas)):
+            for c in range(len(dict_clientes[usuario_escolhido].contas)):
                 print(f'[{c}] - {dict_clientes[usuario_escolhido].contas[c]}')
             conta_escolhida = int(input())
         valor_deposito = float(input('Insira o valor de depósito: '))
-        saldo = Conta.deposito(dict_clientes[usuario_escolhido].contas[conta_escolhida], valor_deposito)
+        saldo = Conta.deposito(dict_clientes[usuario_escolhido].contas[conta_escolhida], valor_deposito, usuario_escolhido)
         print(f'Saldo -> R${saldo:.2f}')
 
     elif operacao == '3':
-        pass  # Visualização de extrato ainda não implementada
+        print('Visualizar Extrato!')
+        print('Deseja visualizar o extrato de qual usuário?')
+        for chave in dict_clientes:
+            print(f'{dict_clientes[chave].nome}: {chave}')
+        usuario_escolhido = str(input('Indique o CPF: '))
+        if len(dict_clientes[chave].contas) > 1:
+            print('Indique qual conta deseja ver o extrato!')
+            for c in range(len(dict_clientes[usuario_escolhido].contas)):
+                print(f'[{c}] - {dict_clientes[usuario_escolhido].contas[c]}')
+            conta_escolhida = int(input())
+        Conta.extrato(usuario_escolhido)
 
     elif operacao == '4':
-        # Criação de novo usuário
         print('Criando Usuário!')
         nome = str(input('Insira o seu nome: '))
         cpf = str(input('Insira o seu cpf: '))
-        data_nascimento = str(input('Data Insira a sua data de nascimento: '))
+        data_nascimento = str(input('Insira a sua data de nascimento: '))
         endereco = str(input('Insira o seu endereço: '))
         usuario = Cliente(cpf, nome, data_nascimento, endereco)
         dict_clientes[cpf] = usuario
 
     elif operacao == '5':
-        # Criação de nova conta para um usuário existente
         print('Criando Conta!')
         print('Para qual usuário você gostaria de criar a conta.')
-
         for chave in dict_clientes:
-            print(f'{dict_clientes[chave].nome}: {chave}')  # Exibe os usuários existentes
-
+            print(f'{dict_clientes[chave].nome}: {chave}')
         Conta.criar_conta(str(input('Indique o CPF: ')))
 
     elif operacao == '8':
-        break  # Encerra o programa
+        break
 
+# Ao final, exibe o resumo dos usuários e suas contas
 for chave in dict_clientes:
     print(f'{chave}: {dict_clientes[chave].nome} / {dict_clientes[chave]}')
     print(f'O usuário {dict_clientes[chave].nome}, possui {len(dict_clientes[chave].contas)} contas')
