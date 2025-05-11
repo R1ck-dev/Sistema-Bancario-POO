@@ -13,8 +13,8 @@ def menu():
     print('[3] Visualizar Extrato')
     print('[4] Criar Usuário')
     print('[5] Criar Conta')
-    # print('[6] Apagar Usuário/Conta')
-    # print('[7] Listar Usuários')
+    print('[6] Apagar Usuário/Conta')
+    print('[7] Listar Usuários')
     print('[8] Sair\n')
     print('-' * tam)
 
@@ -100,7 +100,7 @@ while True:
     menu()
     operacao = str(input('Indique a operação desejada: '))
 
-    if operacao not in '123458':
+    if operacao not in '12345678':
         print('Operação não existente!')
         continue
 
@@ -163,6 +163,30 @@ while True:
         for chave in dict_clientes:
             print(f'{dict_clientes[chave].nome}: {chave}')
         Conta.criar_conta(str(input('Indique o CPF: ')))
+
+    elif operacao == '6':
+        print('Deletar Usuário ou Conta')
+        print('Deletar Usuário ou Conta?')
+        del_escolha = str(input()).lower()
+        if del_escolha == 'usuário':
+            for chave in dict_clientes:
+                print(f'{dict_clientes[chave].nome}: {chave}')
+            usuario_escolhido = str(input('Indique o CPF: '))
+            del dict_clientes[usuario_escolhido]
+        elif del_escolha == 'conta':
+            for chave in dict_clientes:
+                print(f'{dict_clientes[chave].nome}: {chave}')
+            usuario_escolhido = str(input('Indique o CPF: '))
+            for c in range(0, len(dict_clientes[usuario_escolhido].contas)):
+                print(f'[{c}] - {dict_clientes[usuario_escolhido].contas[c]}')
+            conta_escolhida = int(input())
+            del dict_clientes[usuario_escolhido].contas[conta_escolhida]
+        
+
+    elif operacao == '7':
+        print('Listando Usuários!')
+        for chave in dict_clientes:
+            print(f'{chave} [CPF] / {dict_clientes[chave].nome} [Nome] / {len(dict_clientes[chave].contas)} [Quantidade de Contas]')
 
     elif operacao == '8':
         break
