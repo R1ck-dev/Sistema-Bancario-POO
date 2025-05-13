@@ -35,7 +35,7 @@ python main.py
 ```
 
 ## Estrutura do Projeto
-
+```
 Sistema-Bancario/
 │
 ├── banco.py           - Lógica principal do sistema bancário (cadastro, login e operações)
@@ -44,7 +44,7 @@ Sistema-Bancario/
 ├── menus.py           - Funções para exibição dos menus do sistema
 ├── util.py            - Funções auxiliares como validação de entrada
 └── README.md          - Este arquivo
-
+```
 ## Requisitos
 
 - Python 3.x
