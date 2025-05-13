@@ -1,10 +1,10 @@
-# Sistema Bancário em Python
+# Sistema Bancário em POO
 
-Este é um sistema bancário simples desenvolvido em Python. O sistema permite a criação de usuários, criação de contas bancárias, depósitos, saques, visualização de saldo e extrato, bem como a deleção de usuários ou contas. O projeto é modularizado para facilitar manutenção e adição de novos recursos.
+## Descrição
+
+Este projeto é um sistema bancário simples desenvolvido em Python, utilizando os conceitos de Programação Orientada a Objetos (POO). O sistema permite operações básicas de conta bancária como depósitos, saques, transferências e consulta de extrato.
 
 ## Funcionalidades
-
-O sistema possui as seguintes funcionalidades:
 
 1. **Criar Usuário** - Permite a criação de um novo usuário com CPF, nome, data de nascimento, endereço, e-mail e senha.
 2. **Acessar Usuário** - Permite que um usuário existente faça login, utilizando o CPF e as credenciais cadastradas.
@@ -17,24 +17,42 @@ O sistema possui as seguintes funcionalidades:
 9. **Deletar Usuário ou Conta** - Permite a exclusão de um usuário ou uma conta bancária.
 10. **Listar Contas** - Exibe todas as contas bancárias associadas ao usuário.
 
-## Pré-requisitos
+## Como Usar
 
-- Python 3.x ou superior.
-- As dependências do projeto são mínimas, consistindo principalmente de funções e bibliotecas padrão do Python.
+1. Clone o repositório:
+```bash
+git clone https://github.com/R1ck-dev/Sistema-Bancario-POO.git
+```
+
+2. Navegue até o diretório do projeto:
+```bash
+cd Sistema-Bancario-POO
+```
+
+3. Execute o sistema:
+```bash
+python main.py
+```
 
 ## Estrutura do Projeto
 
-O projeto está dividido em módulos para facilitar a manutenção e extensibilidade:
+Sistema-Bancario/
+│
+├── banco.py           - Lógica principal do sistema bancário (cadastro, login e operações)
+├── conta.py           - Classe Conta com métodos de depósito, saque e extrato
+├── cliente.py         - Classes Cliente e PessoaFisica
+├── menus.py           - Funções para exibição dos menus do sistema
+├── util.py            - Funções auxiliares como validação de entrada
+└── README.md          - Este arquivo
 
-- **`cliente.py`** - Define a classe `Cliente` e suas funcionalidades.
-- **`conta.py`** - Define a classe `Conta` e seus métodos relacionados.
-- **`menus.py`** - Contém funções responsáveis pelos menus de operação, como `menu_principal`, `menu` e `barra_carregamento`.
-- **`util.py`** - Contém funções auxiliares como `input_obrigatorio`.
-- **`banco.py`** - Contém o sistema bancário principal que integra todos os módulos.
+## Requisitos
 
-## Como Executar
+- Python 3.x
 
-Para rodar o sistema, basta executar o arquivo `banco.py`:
+## Contribuição
 
-```bash
-python banco.py
+Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou enviar pull requests.
+
+## Licença
+
+Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
