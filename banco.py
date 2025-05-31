@@ -1,4 +1,8 @@
 # Importações dos menus, utilitários e classes necessárias
+import os
+import shutil
+import util
+from datetime import datetime
 from menus import menu_principal, menu, barra_carregamento
 from util import input_obrigatorio
 from cliente import Cliente
@@ -47,6 +51,8 @@ def sistema_principal():
             usuario = Cliente(cpf, nome, data_nascimento, endereco, email, senha)
             dict_clientes[cpf] = usuario
 
+            usuario.criar_usuario_bancoDados(usuario_escolhido=cpf, dict_clientes=dict_clientes)
+
             print('Criando primeira conta!')
             Conta.criar_conta(usuario_escolhido=cpf)
             barra_carregamento()
@@ -85,6 +91,7 @@ def menu_usuario(usuario_escolhido):
         # Operação 1: Consultar saldo
         elif operacao == '1':
             print('Consultando Saldo!')
+            # Se o usuário tiver mais de uma conta, permite escolher qual consultar
             if len(dict_clientes[usuario_escolhido].contas) > 1:
                 print('Indique qual conta deseja consultar o saldo!')
                 for c in range(len(dict_clientes[usuario_escolhido].contas)):
@@ -93,6 +100,7 @@ def menu_usuario(usuario_escolhido):
             else:
                 conta_escolhida = 0  
             
+            # Verifica se a conta escolhida existe
             if conta_escolhida < 0 or conta_escolhida >= len(dict_clientes[usuario_escolhido].contas):
                 print('Conta não existente')
                 continue
@@ -104,6 +112,7 @@ def menu_usuario(usuario_escolhido):
         # Operação 2: Realizar saque
         elif operacao == '2':
             print('Saque!')
+            # Se o usuário tiver mais de uma conta, permite escolher qual sacar
             if len(dict_clientes[usuario_escolhido].contas) > 1:
                 print('Indique qual conta deseja sacar!')
                 for c in range(len(dict_clientes[usuario_escolhido].contas)):
@@ -111,33 +120,39 @@ def menu_usuario(usuario_escolhido):
                 conta_escolhida = input_obrigatorio('', int)
             else:
                 conta_escolhida = 0  
-
+    
+            # Verifica se a conta escolhida existe
             if conta_escolhida < 0 or conta_escolhida >= len(dict_clientes[usuario_escolhido].contas):
                 print('Conta não existente')
                 continue
 
             valor_saque = input_obrigatorio('Insira o valor de saque: ', float)
             saldo = dict_clientes[usuario_escolhido].contas[conta_escolhida].saque(valor_saque, usuario_escolhido)
+            util.altera_valores_extrato_contas_saque(usuario_escolhido, dict_clientes, conta_escolhida, valor_saque, saldo[0])
             print(f'Saldo atual = R${saldo[0]:.2f}')
-            print(f'Quantidade de saques restantes = {saldo[1]}')
+            print(f'Quantidade de saques restantes = {saldo[1]}') 
             barra_carregamento()
 
         # Operação 3: Realizar depósito
         elif operacao == '3':
             print('Depósito!')
+            # Se o usuário tiver mais de uma conta, permite escolher qual depositar
             if len(dict_clientes[usuario_escolhido].contas) > 1:
                 print('Indique qual conta deseja depositar!')
                 for c in range(len(dict_clientes[usuario_escolhido].contas)):
                     print(f'[{c}] - {dict_clientes[usuario_escolhido].contas[c]}')
                 conta_escolhida = input_obrigatorio('', int)
+                # Verifica se a conta escolhida existe
                 if conta_escolhida < 0 or conta_escolhida >= len(dict_clientes[usuario_escolhido].contas):
                     print('Conta não existente')
                     continue
                 valor_deposito = input_obrigatorio('Insira o valor de depósito: ', float)
                 saldo = Conta.deposito(dict_clientes[usuario_escolhido].contas[conta_escolhida], valor_deposito, usuario_escolhido)
+                util.altera_valores_extrato_contas_deposito(usuario_escolhido, dict_clientes, conta_escolhida, valor_deposito, saldo)
             else:
                 valor_deposito = input_obrigatorio('Insira o valor de depósito: ', float)
                 saldo = Conta.deposito(dict_clientes[usuario_escolhido].contas[0], valor_deposito, usuario_escolhido)
+                util.altera_valores_extrato_contas_deposito(usuario_escolhido, dict_clientes, 0, valor_deposito, saldo)
 
             print(f'Saldo -> R${saldo:.2f}')
             barra_carregamento()
@@ -145,11 +160,13 @@ def menu_usuario(usuario_escolhido):
         # Operação 4: Visualizar extrato
         elif operacao == '4':
             print('Visualizar Extrato!')
+            # Se o usuário tiver mais de uma conta, permite escolher qual extrato visualizar
             if len(dict_clientes[usuario_escolhido].contas) > 1:
                 print('Indique qual conta deseja ver o extrato!')
                 for c in range(len(dict_clientes[usuario_escolhido].contas)):
                     print(f'[{c}] - {dict_clientes[usuario_escolhido].contas[c]}')
                 conta_escolhida = input_obrigatorio('', int)
+                # Verifica se a conta escolhida existe
                 if conta_escolhida < 0 or conta_escolhida >= len(dict_clientes[usuario_escolhido].contas):
                     print('Conta não existente')
                     continue
@@ -167,17 +184,23 @@ def menu_usuario(usuario_escolhido):
             print('Deletar Usuário ou Conta')
             print('Deletar Usuário ou Conta?')
             del_escolha = input_obrigatorio('').lower()
+            # Se escolher deletar usuário, remove do dicionário e apaga diretório
             if del_escolha == 'usuário':
                 del dict_clientes[usuario_escolhido]
+                shutil.rmtree(f'data/user/{usuario_escolhido}')
                 break
+            # Se escolher deletar conta, mostra as contas e permite escolher qual deletar
             elif del_escolha == 'conta':
                 for c in range(0, len(dict_clientes[usuario_escolhido].contas)):
                     print(f'[{c}] - {dict_clientes[usuario_escolhido].contas[c]}')
                 conta_escolhida = input_obrigatorio('Selecione a conta à ser deletada:\n', int)
+                # Verifica se a conta escolhida existe
                 if conta_escolhida < 0 or conta_escolhida >= len(dict_clientes[usuario_escolhido].contas):
                     print('Conta não existente')
                     continue
                 del dict_clientes[usuario_escolhido].contas[conta_escolhida]
+                os.remove(f'data/user/{usuario_escolhido}/contas/conta_{conta_escolhida + 1}.txt')
+                os.remove(f'data/user/{usuario_escolhido}/contas/extrato/extrato_{conta_escolhida + 1}.txt')
             barra_carregamento()
 
         # Operação 7: Listar todas as contas do usuário

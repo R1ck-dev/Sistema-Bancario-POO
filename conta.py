@@ -4,6 +4,9 @@ from datetime import datetime
 # Importa a classe Cliente de outro módulo
 from cliente import Cliente
 
+# Importa o módulo os para manipular arquivos e diretórios do sistema operacional
+import os
+
 # Define a classe Conta, responsável pelas funcionalidades bancárias
 class Conta:
     # Variável de classe para contar o número total de contas criadas
@@ -18,6 +21,7 @@ class Conta:
         self.agencia = agencia  # Número da agência
         self.contador_saques = 5  # Limite diário de saques
         self.ultimo_saque = datetime.now().strftime('%d/%m/%Y')  # Data do último saque
+        self.file = None  # Inicializa o arquivo como None
 
     # Método estático que cria uma nova conta para um usuário
     @staticmethod
@@ -25,12 +29,20 @@ class Conta:
         # Verifica se o usuário existe no dicionário de clientes
         if usuario_escolhido not in dict_clientes:
             print('Usuário Inexistente')
+            return
+        # Conta quantas contas o usuário já tem
+        num_contas_usuario = len(dict_clientes[usuario_escolhido].contas) + 1
         # Cria uma nova conta com agência padrão '0001'
         conta = Conta('0001')
         # Associa a nova conta ao usuário escolhido
         dict_clientes[usuario_escolhido].adicionar_conta(conta)
-        # Incrementa o contador de contas
         Conta.contador_contas += 1
+        # Cria arquivos usando o contador do usuário
+        with open(f'data/user/{usuario_escolhido}/contas/conta_{num_contas_usuario}.txt', 'a') as file:
+            file.write(f'Conta [{num_contas_usuario}] -> {conta.agencia} / Saldo -> R${conta._saldo:.2f}\n')
+        os.makedirs(f"data/user/{usuario_escolhido}/contas/extrato", exist_ok=True)
+        with open(f'data/user/{usuario_escolhido}/contas/extrato/extrato_{num_contas_usuario}.txt', 'a') as file:
+            file.write(f'Conta {num_contas_usuario}\n')
 
     # Método estático para validar email e senha de um usuário específico
     def valida_email_senha(usuario_escolhido):
@@ -97,7 +109,8 @@ class Conta:
 
     # Método que retorna o saldo atual da conta
     def visualizar_saldo(self):
+        # Retorna o saldo atual da conta
         return self._saldo
 
 # Dicionário global que armazena todos os clientes cadastrados no sistema
-dict_clientes = dict()  
+dict_clientes = dict()

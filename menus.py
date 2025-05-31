@@ -50,7 +50,7 @@ def menu():
 # Função que simula uma barra de carregamento
 def barra_carregamento(texto="⏳ Aguardando", duracao=2):
     # Exibe o texto inicial (ex: "⏳ Aguardando")
-    print(f"\n{texto}", end='')
+    print(f"\n{texto}", end=' ')
 
     # Loop que imprime blocos █ simulando progresso
     for _ in range(duracao * 4):  # Multiplicado por 4 para ter 0.25s * 4 = 1s por unidade de tempo
